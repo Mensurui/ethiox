@@ -8,7 +8,9 @@ from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from fastapi.responses import JSONResponse
 import os
-from app.settings import settings
+import sys
+sys.path.append('./backend')
+
 
 app = FastAPI()
 
