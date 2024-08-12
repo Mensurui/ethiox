@@ -1,0 +1,49 @@
+from fastapi import FastAPI 
+from .config import init_db
+from .v1.admin.endpoints import admin_endpoints
+from .auth.endpoints import auth_endpoints
+from .v1.user.endpoints import user_endpoints
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
+from fastapi.responses import JSONResponse
+import os
+from .settings import settings
+
+app = FastAPI()
+
+origins = [
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+top = Path(__file__).resolve().parent
+print(f"Serving static files from: {top}/static")
+
+
+@app.on_event("startup")
+async def on_startup():
+    await init_db()
+
+app.mount("/static", StaticFiles(directory=f"{top}/static"), name="static")
+
+@app.get("/root")
+async def root():
+    return {"message":"ETXchange Admin Panel"}
+
+@app.get("/list-static-files")
+async def list_static_files():
+    static_dir = f"{top}/static/images"
+    files = os.listdir(static_dir)
+    return JSONResponse(files)
+
+app.include_router(admin_endpoints.router)
+app.include_router(auth_endpoints.router)
+app.include_router(user_endpoints.router)
