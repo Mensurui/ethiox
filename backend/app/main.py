@@ -40,6 +40,8 @@ app.mount("/static", StaticFiles(directory=f"{top}/static"), name="static")
 async def root():
     return {"message":"ETXchange Admin Panel"}
 
+print("Starting FastAPI application...")
+
 @app.get("/list-static-files")
 async def list_static_files():
     static_dir = f"{top}/static/images"
