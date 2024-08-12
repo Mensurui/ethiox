@@ -1,14 +1,14 @@
 from fastapi import FastAPI 
-from .config import init_db
-from .v1.admin.endpoints import admin_endpoints
-from .auth.endpoints import auth_endpoints
-from .v1.user.endpoints import user_endpoints
+from app.config import init_db
+from app.v1.admin.endpoints import admin_endpoints
+from app.auth.endpoints import auth_endpoints
+from app.v1.user.endpoints import user_endpoints
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from fastapi.responses import JSONResponse
 import os
-from .settings import settings
+from app.settings import settings
 
 app = FastAPI()
 
