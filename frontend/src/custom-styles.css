@@ -1,0 +1,64 @@
+/* Custom Styles */
+.custom-hero-background {
+  background-color: #007bff; /* Or another color that suits your design */
+  color: #ffffff;
+}
+
+.custom-body {
+  padding: 20px;
+}
+
+.box {
+  background-color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: black;
+}
+
+.navbar {
+  margin-top: 10px;
+}
+
+/* Adjust spacing and font sizes as needed */
+/* styles.css or any appropriate CSS file */
+.custom-body {
+  background-color: white;
+  min-height: 100vh; /* Optional: ensures the background covers the full height of the viewport */
+}
+
+* table-styles.css */
+
+.custom-table-cell {
+    white-space: nowrap;
+    font-weight: 500; /* medium font weight */
+    color: #0a146e; /* Replace with your specific 'text-dark-900' color */
+}
+
+.dark .custom-table-cell {
+    color: #ffffff; /* White color in dark mode */
+}
+
+.custom-data{
+    color:black
+}
+.custom-button-data {
+    background-color: transparent; /* Initial color, adjust as needed */
+    border: 1px solid #ccc; /* Adjust the border color if needed */
+    color: #333; /* Text color, adjust as needed */
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.custom-button-data:hover {
+    background-color: #add8e6; /* Light blue when hovered */
+    color: #fff; /* Optional: Change text color on hover */
+}
+
+.custom-button-data:active {
+    background-color: #00008b; /* Dark blue when clicked */
+    color: #fff; /* Optional: Change text color when clicked */
+}
+

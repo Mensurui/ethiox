@@ -1,0 +1,50 @@
+@keyframes ticker-kf {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(-108rem, 0, 0);
+  }
+}
+
+.img-ticker {
+  display: flex;
+  animation: ticker-kf 18s linear infinite;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.img-ticker img {
+  width: 16rem; /* Fixed width */
+  height: 16rem; /* Fixed height */
+  object-fit: cover; /* Ensures the image covers the area */
+  margin: 0 1rem; /* Horizontal margin */
+  flex: none; /* Prevents flex-grow */
+  align-self: flex-start; /* Aligns the images to the start */
+}
+
+/* Responsive styles */
+@media (max-width: 1200px) {
+  .img-ticker img {
+    width: 12rem;
+    height: 12rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .img-ticker img {
+    width: 8rem;
+    height: 8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .img-ticker img {
+    width: 6rem;
+    height: 6rem;
+  }
+}
+
