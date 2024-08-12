@@ -1,5 +1,5 @@
 from fastapi import FastAPI 
-from app.config import init_db
+from .config import init_db
 from app.v1.admin.endpoints import admin_endpoints
 from app.auth.endpoints import auth_endpoints
 from app.v1.user.endpoints import user_endpoints
