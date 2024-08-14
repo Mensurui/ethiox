@@ -6,7 +6,7 @@ const Register = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [, setToken] = useContext(UserContext);
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000'; // Default to local if not set
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://exr.et:8000'; // Default to local if not set
 
     const submitRegistration = async () => {
         try {
