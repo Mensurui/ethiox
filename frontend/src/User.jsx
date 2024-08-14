@@ -3,6 +3,7 @@ import UTable from './components/UTable';
 import BPTable from './components/BPTable';
 import SPTable from './components/SPTable';
 import ImageTicker from './components/ImageTicker';
+import Footer from './components/Footer'
 import './custom-styles.css';
 
 const User = () => {
@@ -18,6 +19,7 @@ const User = () => {
       </div>
       <ImageTicker />
       <UTable />
+      <Footer />
     </>
   );
 };

@@ -1,4 +1,5 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useCallback } from "react";
+import axios from "axios";
 import moment from "moment";
 import ErrorMessage from "./ErrorMessage";
 import { UserContext } from "../context/UserContext";
@@ -15,35 +16,28 @@ const UTable = () => {
     const [calcModal, setCalcModal] = useState(false);
     const [currencyId, setCurrencyId] = useState(null);
     const [t] = useTranslation();
+    const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:8000"; // API base URL
 
-    const getXList = async (currencyId = null) => {
-        const requestOptions = {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        };
-
-        const url = currencyId ? `/user/xlist?currency_id=${currencyId}` : '/user/xlist';
+    const getXList = useCallback(async (currencyId = null) => {
+        const url = currencyId ? `${apiUrl}/user/xlist?currency_id=${currencyId}` : `${apiUrl}/user/xlist`;
 
         try {
-            const response = await fetch(url, requestOptions);
-            const data = await response.json();
-
-            if (!response.ok) {
-                setErrorMessage("Something went wrong");
-            } else {
-                setXList(data);
-                setLoaded(true);
-            }
+            const response = await axios.get(url, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            setXList(response.data);
+            setLoaded(true);
         } catch (error) {
+            console.error('Error fetching data:', error);
             setErrorMessage("Failed to fetch data");
         }
-    };
+    }, [apiUrl, token]);
 
     useEffect(() => {
         getXList(currencyId);
-    }, [currencyId]);
+    }, [currencyId, getXList]);
 
     const handleModal = () => {
         setActiveModal(!activeModal);
@@ -86,15 +80,15 @@ const UTable = () => {
                             </thead>
                             <tbody>
                                 {xlist.map((x) => (
-                                    <React.Fragment key={x.id}>
-                                        <tr>
+                                    <>
+                                        <tr key={x.id}>
                                             <td>{x.bank_name}</td>
                                             <td>{x.currency_name}</td>
                                             <td className="has-text-danger">{x.selling_price}</td>
                                             <td className="has-text-success">{x.buying_price}</td>
                                             <td>
                                                 <button className="button is-small is-info" onClick={() => toggleExpandRow(x.id)}>
-                                                    {expandedRowId === x.id ? "Hide" : "More"}
+                                                    {expandedRowId === x.id ? t('userTable.hide') : t('userTable.more')}
                                                 </button>
                                             </td>
                                         </tr>
@@ -109,22 +103,22 @@ const UTable = () => {
                                                 </td>
                                             </tr>
                                         )}
-                                    </React.Fragment>
+                                    </>
                                 ))}
                             </tbody>
                         </table>
                     </div>
                     <div className="buttons mt-5 mb-5">
                         <button className="button is-info" onClick={() => setActiveModal(true)}>
-                            Filter Forex Rates
+                            Filter
                         </button>
                         <button className="button is-primary ml-3" onClick={() => setCalcModal(true)}>
-                            Open Calculator
+                            Calculator
                         </button>
                     </div>
                 </>
             ) : (
-                <p className="has-text-centered has-text-warning">Loading Forex Data...</p>
+                <p className="has-text-centered has-text-warning">{t('userTable.loading')}</p>
             )}
             <UXCModal 
                 active={activeModal} 

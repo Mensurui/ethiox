@@ -1,42 +1,45 @@
 import React, { useState, useContext } from "react";
-
-
-import ErrorMessage from "./ErrorMessage";
+import axios from "axios";
 import { UserContext } from "../context/UserContext";
-
+import ErrorMessage from "./ErrorMessage";
 
 const Login = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const [, setToken] = useContext(UserContext);
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000'; // Default to local if not set
 
-    const submitLogin = async() => {
-        const requestOptions = {
-            method: "POST",
-            headers : {
-                "Content-Type":"application/x-www-form-urlencoded"
-            },
-            body: JSON.stringify(
-                `grant_type=password&username=${username}&password=${password}&scope=&client_id=&client_secret=`
-            ),
-        };
+    const submitLogin = async () => {
+        try {
+            const response = await axios.post(
+                `${apiUrl}/token`,
+                new URLSearchParams({
+                    grant_type: "password",
+                    username: username,
+                    password: password,
+                    scope: "",
+                    client_id: "",
+                    client_secret: "",
+                }),
+                { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+            );
 
-        const response = await fetch("/token", requestOptions);
-        const data = await response.json();
-
-        if(!response.ok){
-            setErrorMessage(data.detail);
-        }else{
-            localStorage.setItem("exrToken", data.access_token);
-            setToken(data.access_token);
+            localStorage.setItem("exrToken", response.data.access_token);
+            setToken(response.data.access_token);
+        } catch (error) {
+            if (error.response && error.response.data) {
+                setErrorMessage(error.response.data.detail);
+            } else {
+                setErrorMessage("Something went wrong");
+            }
         }
     };
-    
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        submitLogin()
-    }
+        submitLogin();
+    };
 
     return (
         <div className="column">
@@ -73,8 +76,10 @@ const Login = () => {
                     Login
                 </button>
             </form>
+            {errorMessage && <ErrorMessage message={errorMessage} />}
         </div>
     );
 };
 
 export default Login;
+

@@ -7,6 +7,7 @@ const ImageUpload = () => {
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
   const [token] = useContext(UserContext); // Retrieve the token from context
+  const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -24,7 +25,7 @@ const ImageUpload = () => {
 
     try {
       setUploading(true);
-      const response = await axios.post('/admin/upload-image', formData, {
+      const response = await axios.post(`${apiUrl}/admin/upload-image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${token}`, // Include the token in the request headers
@@ -32,6 +33,7 @@ const ImageUpload = () => {
       });
       setMessage('File uploaded successfully!');
     } catch (error) {
+      console.error('Upload failed:', error); // Logging for debugging
       setMessage('Failed to upload file.');
     } finally {
       setUploading(false);

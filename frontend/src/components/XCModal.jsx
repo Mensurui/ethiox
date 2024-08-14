@@ -1,24 +1,22 @@
 import React, { useState, useEffect } from "react";
 
-const XCModal = ({ active, handleModal, token, id, setErrorMessage }) => {
-    const [bankName, setBankName] = useState("");
+const XCModal = ({ active, handleModal, token, setErrorMessage }) => {
     const [banksList, setBanksList] = useState([]);
-    const [currencyName, setCurrencyName] = useState("");
     const [currencyList, setCurrencyList] = useState([]);
     const [sellingPrice, setSellingPrice] = useState("");
     const [buyingPrice, setBuyingPrice] = useState("");
     const [bankId, setBankId] = useState("");
     const [currencyId, setCurrencyId] = useState("");
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     const cleanFormData = () => {
-        setBankName("");
-        setCurrencyName("");
         setSellingPrice("");
         setBuyingPrice("");
         setBankId("");
         setCurrencyId("");
         console.log("Form data cleaned");
     };
+
     const handleCreateExchangeRate = async (e) => {
         e.preventDefault();
 
@@ -37,12 +35,12 @@ const XCModal = ({ active, handleModal, token, id, setErrorMessage }) => {
                 bank_id: bankId,
                 currency_id: currencyId,
                 selling_price: sellingPrice,
-                buying_price: buyingPrice, // Ensure consistent naming
+                buying_price: buyingPrice,
             }),
         };
 
         try {
-            const response = await fetch("/admin/add_xchange", requestOptions);
+            const response = await fetch(`${apiUrl}/admin/add_xchange`, requestOptions);
 
             if (!response.ok) {
                 const errorData = await response.json();
@@ -66,8 +64,8 @@ const XCModal = ({ active, handleModal, token, id, setErrorMessage }) => {
                         "Authorization": `Bearer ${token}`,
                     },
                 };
-                const response = await fetch("/admin/blist", requestOptions);
-                
+                const response = await fetch(`${apiUrl}/admin/blist`, requestOptions);
+
                 if (!response.ok) {
                     throw new Error("Failed to fetch banks list");
                 }
@@ -88,7 +86,7 @@ const XCModal = ({ active, handleModal, token, id, setErrorMessage }) => {
                         "Authorization": `Bearer ${token}`,
                     },
                 };
-                const response = await fetch("/admin/clist", requestOptions);
+                const response = await fetch(`${apiUrl}/admin/clist`, requestOptions);
 
                 if (!response.ok) {
                     throw new Error("Failed to fetch currency list");
@@ -99,13 +97,13 @@ const XCModal = ({ active, handleModal, token, id, setErrorMessage }) => {
             } catch (error) {
                 setErrorMessage("Failed to fetch currency list");
             }
-        }
+        };
 
         if (active) {
             fetchBanksList();
             fetchCurrencyList();
         }
-    }, [active, token]);
+    }, [active, token, apiUrl, setErrorMessage]);
 
     return (
         <div className={`modal ${active ? "is-active" : ""}`}>
@@ -163,7 +161,7 @@ const XCModal = ({ active, handleModal, token, id, setErrorMessage }) => {
                                   className="input"
                                   required
                                 />
-                          </div>
+                            </div>
                         </div>
                         <div className="field">
                             <label className="label">Buying Price</label>
@@ -176,7 +174,7 @@ const XCModal = ({ active, handleModal, token, id, setErrorMessage }) => {
                                   className="input"
                                   required
                                 />
-                          </div>
+                            </div>
                         </div>
                     </form>
                 </section>

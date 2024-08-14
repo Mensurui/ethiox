@@ -8,11 +8,12 @@ const ImageRemove = () => {
   const [token] = useContext(UserContext); // Retrieve the token from context
   const [feedback, setFeedback] = useState(''); // For success or error messages
   const [loading, setLoading] = useState(false); // For loading state
+  const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:8000"; // API base URL
 
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const response = await axios.get('/admin/images', {
+        const response = await axios.get(`${apiUrl}/admin/images`, {
           headers: {
             'Authorization': `Bearer ${token}`, // Include the token in the request headers
           },
@@ -25,7 +26,7 @@ const ImageRemove = () => {
     };
 
     fetchImages();
-  }, [token]);
+  }, [token, apiUrl]);
 
   const handleDelete = async () => {
     if (!selectedImage) {
@@ -37,7 +38,7 @@ const ImageRemove = () => {
     setFeedback('');
 
     try {
-      await axios.delete('/admin/images', {
+      await axios.delete(`${apiUrl}/admin/images`, {
         headers: {
           'Authorization': `Bearer ${token}`, // Include the token in the request headers
         },
@@ -83,6 +84,7 @@ const ImageRemove = () => {
           <button
             className={`button is-danger ${loading ? 'is-loading' : ''}`}
             onClick={handleDelete}
+            disabled={loading}
           >
             Delete Selected Image
           </button>

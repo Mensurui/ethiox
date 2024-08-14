@@ -2,7 +2,6 @@ import React, { useContext, useState, useEffect, useCallback } from "react";
 import ErrorMessage from "./ErrorMessage";
 import { UserContext } from "../context/UserContext";
 import UXCModal from "./UXCModal";
-import { Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from "flowbite-react";
 import { useTranslation, Trans } from 'react-i18next'
 
 const SPTable = () => {
@@ -15,6 +14,7 @@ const SPTable = () => {
   const [currency, setCurrency] = useState("Dollar"); // Default currency
   const [isVisible, setIsVisible] = useState(true); // For blinking "Live" tag
   const { t } = useTranslation();
+  const apiUrl = process.env.REACT_APP_API_URL
 
   const getXList = useCallback(async (currencyName) => {
     const requestOptions = {
@@ -23,9 +23,9 @@ const SPTable = () => {
         "Content-Type": "application/json",
       },
     };
-
+    
     try {
-      const response = await fetch(`/user/xlist/tsp?currency_name=${currencyName}`, requestOptions);
+      const response = await fetch(`${apiUrl}/user/xlist/tsp?currency_name=${currencyName}`, requestOptions);
       const data = await response.json();
 
       if (!response.ok) {

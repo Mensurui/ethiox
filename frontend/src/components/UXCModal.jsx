@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import axios from 'axios';
 
 const UXCModal = ({ active, handleModal, token, setErrorMessage, onFilter }) => {
     const [currencyId, setCurrencyId] = useState("");
     const [currencyList, setCurrencyList] = useState([]);
+    const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:8000"; // API base URL
 
     const cleanFormData = () => {
         setCurrencyId("");
@@ -28,20 +30,17 @@ const UXCModal = ({ active, handleModal, token, setErrorMessage, onFilter }) => 
     useEffect(() => {
         const fetchCurrencyList = async () => {
             try {
-                const requestOptions = {
-                    method: "GET",
+                const response = await axios.get(`${apiUrl}/user/clist`, {
                     headers: {
-                        "Content-Type": "application/json",
+                        'Authorization': `Bearer ${token}`,
                     },
-                };
-                const response = await fetch("/user/clist", requestOptions);
+                });
 
-                if (!response.ok) {
+                if (!response.status === 200) {
                     throw new Error("Failed to fetch currency list");
                 }
 
-                const data = await response.json();
-                setCurrencyList(data);
+                setCurrencyList(response.data);
             } catch (error) {
                 setErrorMessage("Failed to fetch currency list");
             }
@@ -50,7 +49,7 @@ const UXCModal = ({ active, handleModal, token, setErrorMessage, onFilter }) => 
         if (active) {
             fetchCurrencyList();
         }
-    }, [active, token, setErrorMessage]);
+    }, [active, apiUrl, token, setErrorMessage]);
 
     return (
         <div className={`modal ${active ? "is-active" : ""}`}>

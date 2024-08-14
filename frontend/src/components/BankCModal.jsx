@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+  const apiUrl = process.env.REACT_APP_API_URL
 const BankCModal = ({ active, handleModal, token, id, setErrorMessage }) => {
     const [bankName, setBankName] = useState("");
     const cleanFormData = () => {
@@ -15,7 +15,7 @@ const BankCModal = ({ active, handleModal, token, id, setErrorMessage }) => {
             },
             body:JSON.stringify({bank_name:bankName}),
         };
-        const response = await fetch("/admin/add_banks", requestOptions);
+        const response = await fetch(`${apiUrl}/admin/add_banks`, requestOptions);
 
         if (!response.ok){
             setErrorMessage("Something went wrong when creating Bank");

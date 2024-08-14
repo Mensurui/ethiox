@@ -1,4 +1,3 @@
-/* Custom Styles */
 .custom-hero-background {
   background-color: #007bff; /* Or another color that suits your design */
   color: #ffffff;
@@ -30,8 +29,7 @@
   min-height: 100vh; /* Optional: ensures the background covers the full height of the viewport */
 }
 
-* table-styles.css */
-
+/* table-styles.css */
 .custom-table-cell {
     white-space: nowrap;
     font-weight: 500; /* medium font weight */
@@ -42,9 +40,10 @@
     color: #ffffff; /* White color in dark mode */
 }
 
-.custom-data{
-    color:black
+.custom-data {
+    color: black;
 }
+
 .custom-button-data {
     background-color: transparent; /* Initial color, adjust as needed */
     border: 1px solid #ccc; /* Adjust the border color if needed */

@@ -1,33 +1,29 @@
 import React, { useState, useContext } from "react";
+import axios from "axios";
 import { UserContext } from "../context/UserContext";
 
 const Register = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [, setToken] = useContext(UserContext);
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000'; // Default to local if not set
 
     const submitRegistration = async () => {
         try {
-            const requestOptions = {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password }),
-            };
+            const response = await axios.post(
+                `${apiUrl}/admin/register/`,
+                { username, password },
+                { headers: { "Content-Type": "application/json" } }
+            );
 
-            const response = await fetch("/admin/register/", requestOptions);
-            const data = await response.json();
-
-            if (!response.ok) {
-                console.error("Error:", data);
-                alert("Registration failed: " + data.message || "An error occurred");
-            } else {
-                console.log("Data:", data.access_token);
-                localStorage.setItem("exrToken", data.access_token); // Save token to localStorage
-                setToken(data.access_token); // Update context
-            }
+            localStorage.setItem("exrToken", response.data.access_token);
+            setToken(response.data.access_token);
         } catch (error) {
-            console.error("Fetch error:", error);
-            alert("An error occurred: " + error.message);
+            if (error.response && error.response.data) {
+                alert("Registration failed: " + error.response.data.message || "An error occurred");
+            } else {
+                alert("An error occurred: " + error.message);
+            }
         }
     };
 
