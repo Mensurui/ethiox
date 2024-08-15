@@ -34,7 +34,7 @@ async def on_startup():
 
 app.mount("/static", StaticFiles(directory=f"{top}/static"), name="static")
 
-@app.get("/root")
+@app.get("/")
 async def root():
     return {"message":"ETXchange Admin Panel"}
 
