@@ -9,6 +9,7 @@ from ....auth.services import auth_services
 from datetime import timedelta
 from sqlalchemy.future import select
 from sqlalchemy import delete, desc
+from sqlalchemy import func, distinct
 
 async def get_user(username:str, db:AsyncSession=Depends(get_db)):
     user_query = select(admin_models.Admin).where(admin_models.Admin.username==username)
@@ -96,23 +97,43 @@ async def exchange_rate(xchange_data:admin_schemas.ExchangeRateInput, db:AsyncSe
     await db.refresh(db_xrate)
     return db_xrate
 
+
 async def exchange_list(db: AsyncSession = Depends()):
+    # Subquery to get the latest date for each bank
+    subquery = (
+        select(
+            admin_models.DailyExchangeRate.bank_id,
+            func.max(admin_models.DailyExchangeRate.date).label("latest_date")
+        )
+        .group_by(admin_models.DailyExchangeRate.bank_id, admin_models.DailyExchangeRate.currency_id)
+        .subquery()
+    )
+    
+    # Main query to select unique bank data based on the latest date
     exchange_query = (
         select(admin_models.DailyExchangeRate)
+        .join(
+            subquery,
+            (admin_models.DailyExchangeRate.bank_id == subquery.c.bank_id) &
+            (admin_models.DailyExchangeRate.date == subquery.c.latest_date)
+        )
         .options(
             joinedload(admin_models.DailyExchangeRate.bank),
             joinedload(admin_models.DailyExchangeRate.currency)
         )
-        .order_by(desc(admin_models.DailyExchangeRate.date))  # Sorting by date in descending order
+        .order_by(desc(admin_models.DailyExchangeRate.date))
     )
+    
     exchange_data = await db.execute(exchange_query)
     exchange_list = exchange_data.scalars().all()
 
     exchange_listed = [
         admin_schemas.ExchangeRateOut(
             id=x.id,
-            selling_price=x.selling_price,
-            buying_price=x.buying_price,
+            transactional_selling_price=x.transactional_selling_price,
+            transactional_buying_price=x.transactional_buying_price,
+            cash_selling_price=x.cash_selling_price,
+            cash_buying_price=x.cash_buying_price,
             bank_name=x.bank.bank_name,
             currency_name=x.currency.currency_name,
             currency_icon=x.currency.currency_icon
@@ -120,6 +141,7 @@ async def exchange_list(db: AsyncSession = Depends()):
         for x in exchange_list
     ]
     return exchange_listed
+
 
 async def remove_exchange(x_id:int, db:AsyncSession=Depends(get_db)):
     exchange_query = select(admin_models.DailyExchangeRate).where(admin_models.DailyExchangeRate.id == x_id)
@@ -134,6 +156,16 @@ async def remove_exchange(x_id:int, db:AsyncSession=Depends(get_db)):
     await db.commit()
     return {"detail":"Success"}
 
+async def add_image(image_data: admin_schemas.PromotionalImagesIn, db:AsyncSession=Depends(get_db)):
+    db_image = admin_models.PromotionalImages(
+            url = image_data.secure_url,
+            title = image_data.etag
+            )
+    db.add(db_image)
+    await db.commit()
+    await db.refresh(db_image)
+    return {"message":"success"}
+
 async def images(db:AsyncSession=Depends(get_db)):
     images_query = select(admin_models.PromotionalImages)
     images_operation = await db.execute(images_query)
@@ -141,7 +173,8 @@ async def images(db:AsyncSession=Depends(get_db)):
     images_listed = [
             admin_schemas.PromotionalImagesout(
                 id = image.id,
-                title = image.title
+                title = image.title,
+                url = image.url
                 )for image in images_data
             ]
     return images_listed

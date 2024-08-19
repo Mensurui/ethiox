@@ -18,10 +18,8 @@ export const UserProvider = (props) => {
       };
 
       const response = await fetch("/admin/me", requestOptions);
-      console.log("Response is ", response);
 
       if (!response.ok) {
-        console.log("Clearing token due to unauthorized response");
         setToken(null);
         localStorage.removeItem("exrToken");
       }
@@ -34,7 +32,6 @@ export const UserProvider = (props) => {
   useEffect(() => {
     if (token) {
       localStorage.setItem("exrToken", token);
-      console.log("Token saved to localStorage:", token);
     }
   }, [token]);
 

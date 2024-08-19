@@ -8,7 +8,7 @@ const Login = () => {
     const [password, setPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const [, setToken] = useContext(UserContext);
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000'; // Default to local if not set
+    const apiUrl = process.env.REACT_APP_API_URL || 'https://exr.et/api';
 
     const submitLogin = async () => {
         try {

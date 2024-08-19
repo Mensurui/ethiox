@@ -25,6 +25,7 @@ async def login_for_access_token(
     access_token = auth_services.create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
+    print(f"Username:{user.username}, Password:{user.password}")
     return auth_schemas.Token(access_token=access_token, token_type="bearer")
 
 

@@ -36,8 +36,10 @@ class DailyExchangeRate(Base):
     __tablename__="daily_exchangerate"
     
     id = Column(Integer, primary_key=True, index=True)
-    selling_price = Column(Float, nullable=False)
-    buying_price = Column(Float, nullable=False)
+    transactional_buying_price = Column(Float, nullable=False)
+    transactional_selling_price = Column(Float, nullable=False)
+    cash_buying_price = Column(Float, nullable=False)
+    cash_selling_price = Column(Float, nullable=False)
     date = Column(DateTime, default=func.now())
     bank_id = Column(Integer, ForeignKey("bank.id"), nullable=False)
     currency_id = Column(Integer, ForeignKey("currency.id"), nullable=False)

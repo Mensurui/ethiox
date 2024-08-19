@@ -1,12 +1,14 @@
 import React, { useState, useContext } from "react";
 import axios from "axios";
 import { UserContext } from "../context/UserContext";
+import ErrorMessage from "./ErrorMessage"; // Import ErrorMessage component
 
 const Register = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [errorMessage, setErrorMessage] = useState(""); // State for error message
     const [, setToken] = useContext(UserContext);
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://exr.et:8000'; // Default to local if not set
+    const apiUrl = process.env.REACT_APP_API_URL || 'https://exr.et/api';
 
     const submitRegistration = async () => {
         try {
@@ -20,9 +22,9 @@ const Register = () => {
             setToken(response.data.access_token);
         } catch (error) {
             if (error.response && error.response.data) {
-                alert("Registration failed: " + error.response.data.message || "An error occurred");
+                setErrorMessage(error.response.data.message || "Registration failed"); // Handle error response
             } else {
-                alert("An error occurred: " + error.message);
+                setErrorMessage("An error occurred: " + error.message); // Handle general errors
             }
         }
     };
@@ -67,6 +69,7 @@ const Register = () => {
                     Register
                 </button>
             </form>
+            {errorMessage && <ErrorMessage message={errorMessage} />} {/* Show error message if exists */}
         </div>
     );
 };

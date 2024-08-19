@@ -16,8 +16,10 @@ class CurrencyInput(BaseModel):
     currency_icon: Optional[str]
 
 class ExchangeRateBase(BaseModel):
-    selling_price:float
-    buying_price:float
+    transactional_buying_price:float
+    transactional_selling_price:float
+    cash_buying_price:float
+    cash_selling_price:float
 
 class ExchangeRateInput(ExchangeRateBase):
     bank_id:int
@@ -31,8 +33,13 @@ class ExchangeRateOut(ExchangeRateBase):
     class Config:
         orm_mode = True
 
+class PromotionalImagesIn(BaseModel):
+    secure_url:str
+    etag:str
+
 class PromotionalImagesout(BaseModel):
     id:int
     title:str
+    url:str
     class Config:
         orm_mode=True

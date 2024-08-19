@@ -8,7 +8,7 @@ const ImageTicker = () => {
   useEffect(() => {
     const fetchImageUrls = async () => {
       try {
-        const response = await axios.get('/user/ad'); // Replace with your actual endpoint
+        const response = await axios.get('https://exr.et/api/user/ad'); // Replace with your actual endpoint
         console.log('Fetched image data:', response.data); // Debugging log
         setImageUrls(response.data.map(image => image.url));
       } catch (error) {

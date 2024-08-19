@@ -14,9 +14,10 @@ const UTable = () => {
     const [loaded, setLoaded] = useState(false);
     const [activeModal, setActiveModal] = useState(false);
     const [calcModal, setCalcModal] = useState(false);
-    const [currencyId, setCurrencyId] = useState(null);
+    const [currencyId, setCurrencyId] = useState(1);
     const [t] = useTranslation();
     const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:8000"; // API base URL
+    console.log("API URL", apiUrl)
 
     const getXList = useCallback(async (currencyId = null) => {
         const url = currencyId ? `${apiUrl}/user/xlist?currency_id=${currencyId}` : `${apiUrl}/user/xlist`;
@@ -68,7 +69,7 @@ const UTable = () => {
                         <p className="subtitle is-5 has-text-grey-dark">{t('userTable.subTitle')}</p>
                     </div>
                     <div className="table-container mt-5">
-                        <table className="table is-fullwidth has-background-dark is-bordered is-striped is-hoverable">
+                        <table className="table is-fullwidth is-bordered is-striped is-hoverable">
                             <thead className="has-background-info">
                                 <tr>
                                     <th className="has-text-white">{t('userTable.bankName')}</th>

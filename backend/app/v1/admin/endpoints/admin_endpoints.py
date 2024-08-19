@@ -1,5 +1,5 @@
 from ..schemas import admin_schemas
-from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from ..services import admin_services
 from ....config import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,11 +8,20 @@ from ..models import admin_models
 from pathlib import Path
 import shutil
 from fastapi.responses import JSONResponse
+import cloudinary
+from cloudinary.uploader import upload
+from cloudinary.utils import cloudinary_url
+from ....settings import settings
+
 
 router = APIRouter()
-BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
-print(f"BaseDIR is:{BASE_DIR}")
-UPLOAD_DIRECTORY = BASE_DIR / "static/images"
+
+cloudinary.config(
+        cloud_name = f"{settings.cloud_name}",
+        api_key = f"{settings.api_key}",
+        api_secret = f"{settings.api_secret}",
+        secure = f"{settings.secure}"
+        )
 
 @router.post('/admin/register')
 async def admin_register(admin_data:admin_schemas.AdminInput, db:AsyncSession=Depends(get_db)):
@@ -59,6 +68,7 @@ async def add_xchange(xchange_data:admin_schemas.ExchangeRateInput, current_user
 @router.get('/admin/xlist')
 async def get_xchange(current_user=Depends(auth_services.get_current_user), db:AsyncSession=Depends(get_db)):
     x_list = await admin_services.exchange_list(db=db)
+    print(f"ExchangeList: {x_list}")
     return x_list
 
 @router.delete('/admin/x_rlist')
@@ -67,19 +77,14 @@ async def remove_xchange(x_id: int, current_user=Depends(auth_services.get_curre
     return x_value
 
 @router.post('/admin/upload-image')
-async def add_image(file:UploadFile = File(...), current_user=Depends(auth_services.get_current_user), db:AsyncSession=Depends(get_db)):
-    if file.content_type not in ["image/jpeg", "image/png"]:
-        return JSONResponse(content={"error": "Invalid image format"}, status_code=400)
-    Path(UPLOAD_DIRECTORY).mkdir(parents=True, exist_ok=True)
-    file_path = Path(UPLOAD_DIRECTORY) / file.filename
-    with file_path.open("wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    relative_url = f"/static/images/{file.filename}"
-    db_image = admin_models.PromotionalImages(url=relative_url, title=file.filename)  # Adjust based on your Image model
-    db.add(db_image)
-    await db.commit()
-    
-    return {"url": relative_url}
+async def add_images(file:UploadFile = File(...), current_user=Depends(auth_services.get_current_user), db:AsyncSession=Depends(get_db)):
+    try:
+        result = upload(file.file)
+        print(f"Result: {result}")
+        await admin_services.add_image(image_data=admin_schemas.PromotionalImagesIn(secure_url=result["secure_url"], etag=result["etag"]), db=db)
+        return {"success"}
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"Error{e}")
 
 @router.get('/admin/images')
 async def get_images(current_user=Depends(auth_services.get_current_user), db:AsyncSession=Depends(get_db)):
