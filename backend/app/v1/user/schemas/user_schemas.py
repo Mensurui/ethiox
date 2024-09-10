@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from datetime import date
+from typing import Optional
 
 class ExchangeRateBase(BaseModel):
     transactional_selling_price:float
@@ -55,3 +57,21 @@ class ExchangeRateOutTBP(BaseModel):
     class Config():
         orm_mode = True
 
+class ArticlesShowcase(BaseModel):
+    id:int
+    title:str
+    source:str
+    date_published:date
+
+class ArticlesShowcaseMore(ArticlesShowcase):
+    article_category_name:str
+
+class ArticleOut(BaseModel):
+    title:str
+    sub_title:str
+    content:str
+    source:str
+    author:Optional[str]=None
+    article_category_name:str
+    article_category_id:int
+    date_published:date

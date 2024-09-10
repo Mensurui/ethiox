@@ -8,7 +8,8 @@ from sqlalchemy import desc
 from ..schemas import user_schemas
 from ...admin.models import admin_models
 from ..utils import user_utils
-from typing import List
+from typing import List, Optional
+
 '''
 async def exchange_list(currency_id:int, db: AsyncSession = Depends(get_db)):
     exchange_query = (
@@ -283,3 +284,66 @@ async def top_cashbuyingrate(currency_id:int, db:AsyncSession = Depends(get_db))
     top_three = await user_utils.top_three_cbp(exchange_listed)
     return top_three
 
+async def get_article(article_id:Optional[str]=None, db:AsyncSession=Depends(get_db)):
+    if not article_id:
+        article_query = select(admin_models.Articles)
+        article_exec = await db.execute(article_query)
+        article_result = article_exec.scalars().all()
+    else:
+        article_query = select(admin_models.Articles).where(admin_models.Articles.id == article_id).options(joinedload(admin_models.Articles.article_category))
+        article_exec = await db.execute(article_query)
+        article_result = article_exec.scalars().all()
+        article_data = [user_schemas.ArticleOut(
+            title=article.title,
+            sub_title=article.sub_title,
+            content=article.content,
+            source=article.source,
+            author=article.author,
+            article_category_id=article.article_category_id,
+            article_category_name=article.article_category.article_category_name, 
+            date_published=article.date_published
+        )for article in article_result]
+        return article_data
+    if not article_result:
+        raise HTTPException(status_code=405, detail=f"No data")
+
+
+async def get_title_articles(db:AsyncSession=Depends(get_db)) -> List[user_schemas.ArticlesShowcaseMore]:
+    try:
+        articles_query = select(admin_models.Articles).order_by(desc(admin_models.Articles.date_published)).options(joinedload(admin_models.Articles.article_category))
+        articles_exec = await db.execute(articles_query)
+        articles_result = articles_exec.scalars().all()
+        if not articles_result:
+            raise HTTPException(status_code=405, details=f"No data")
+    
+        articles_listed = [
+            user_schemas.ArticlesShowcaseMore(
+                id = articles.id,
+                title = articles.title,
+                source = articles.source,
+                date_published = articles.date_published,
+                article_category_name = articles.article_category.article_category_name
+                    )for articles in articles_result
+        ]
+        return articles_listed
+    except Exception as e:
+        raise HTTPException(status_code=403, detail=f"Error: {e}")
+
+async def related_news(category:int, db:AsyncSession=Depends(get_db)) -> List[user_schemas.ArticlesShowcaseMore]:
+    query = select(admin_models.Articles).where(admin_models.Articles.article_category_id == category).options(joinedload(admin_models.Articles.article_category))
+    exec = await db.execute(query)
+    results = exec.scalars().all()
+
+    if not results:
+        raise HTTPException(status_code=403, details=f"No data")
+
+    related_articles = [
+        user_schemas.ArticlesShowcaseMore(
+            id = articles.id,
+            title = articles.title,
+            source = articles.source,
+            date_published = articles.date_published,
+            article_category_name = articles.article_category.article_category_name
+        )for articles in results
+    ]
+    return related_articles

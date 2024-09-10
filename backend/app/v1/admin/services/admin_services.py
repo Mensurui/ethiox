@@ -10,6 +10,7 @@ from datetime import timedelta
 from sqlalchemy.future import select
 from sqlalchemy import delete, desc
 from sqlalchemy import func, distinct
+from typing import List, Optional
 
 async def get_user(username:str, db:AsyncSession=Depends(get_db)):
     user_query = select(admin_models.Admin).where(admin_models.Admin.username==username)
@@ -191,3 +192,89 @@ async def remove_image(image_id:int, db:AsyncSession=Depends(get_db)):
     await db.execute(delete_query)
     await db.commit()
     return {"detail":"Success"}
+
+async def add_art_category(article_category_name:str, db:AsyncSession=Depends(get_db)):
+    query = select(admin_models.ArticlesCategory).where(admin_models.ArticlesCategory.article_category_name == article_category_name)
+    exec = await db.execute(query)
+    data = exec.scalars().first()
+    
+    if data:
+        raise HTTPException(status_code=403, details="Already Registered Category")
+
+    db_article_cat = admin_models.ArticlesCategory(article_category_name = article_category_name)
+    db.add(db_article_cat)
+    await db.commit()
+    await db.refresh(db_article_cat)
+    return {"message":"success"}
+
+async def get_art_category(db:AsyncSession=Depends(get_db)):
+    query = select(admin_models.ArticlesCategory)
+    exec = await db.execute(query)
+    data = exec.scalars().all()
+    if not data:
+        raise HTTPException(status_code=403, detail=f"Empty")
+    return data
+
+
+async def add_article(article_data:admin_schemas.Article, db:AsyncSession=Depends(get_db)):
+    try:
+        query = select(admin_models.ArticlesCategory).where(admin_models.ArticlesCategory.id == article_data.article_category_id)
+        exec = await db.execute(query)
+        data = exec.scalars().all()
+        if not data:
+            raise HTTPException(status_code=403, detail=f"Error is that their is no category with that ID")
+        db_article = admin_models.Articles(**article_data.model_dump())
+        db.add(db_article)
+        await db.commit()
+        await db.refresh(db_article)
+        return db_article
+    except Exception as e:
+        raise HTTPException(status_code=403, detail=f"Error is: {e}")
+
+async def get_article(article_id: Optional[str] = None, db: AsyncSession = Depends(get_db)):
+    if not article_id:
+        article_query = select(admin_models.Articles)
+        article_exec = await db.execute(article_query)
+        article_result = article_exec.scalars().all()
+
+    else:
+        article_query = select(admin_models.Articles).where(admin_models.Articles.id == article_id).options(joinedload(admin_models.Articles.article_category))
+        article_exec = await db.execute(article_query)
+        article_result = article_exec.scalars().all()
+
+    if not article_result:
+        raise HTTPException(status_code=405, detail=f"No data")
+    
+    if article_id:
+        articles_data = [admin_schemas.ArticleOut(
+            title=article.title,
+            sub_title=article.sub_title,
+            content=article.content,
+            source=article.source,
+            author=article.author,
+            article_category_name=article.article_category.article_category_name,
+            date_published=article.date_published
+        ) for article in article_result]
+        return articles_data
+    
+    return article_result
+
+
+async def get_title_articles(db: AsyncSession = Depends(get_db)) -> List[admin_schemas.ArticlesShowcase]:
+    articles_query = select(admin_models.Articles)
+    articles_exec = await db.execute(articles_query)
+    articles_result = articles_exec.scalars().all()
+    
+    if not articles_result:
+        raise HTTPException(status_code=404, detail="No data found")
+
+    articles_listed = [
+        admin_schemas.ArticlesShowcase(
+            id=article.id,
+            title=article.title,
+            source=article.source,
+            date_published=article.date_published
+        ) for article in articles_result
+    ]
+    
+    return articles_listed

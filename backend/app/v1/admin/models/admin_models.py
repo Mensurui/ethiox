@@ -1,5 +1,5 @@
 from ....config import Base
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, func
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, func, Text, Date
 from sqlalchemy.orm import relationship
 
 class Admin(Base):
@@ -46,3 +46,25 @@ class DailyExchangeRate(Base):
 
     currency = relationship("Currency", back_populates="daily_xr")
     bank = relationship("Bank", back_populates="daily_xr")
+
+class ArticlesCategory(Base):
+    __tablename__="articles_category"
+    id = Column(Integer, primary_key=True, index=True)
+    article_category_name = Column(String, nullable=False)
+    articles = relationship("Articles", back_populates="article_category")
+
+class Articles(Base):
+    __tablename__ = "articles"
+    id = Column(Integer, primary_key=True, index=True)
+    article_category_id = Column(Integer, ForeignKey("articles_category.id", ondelete="CASCADE"), nullable=False)
+    author = Column(String)
+    title = Column(String, nullable=False)
+    sub_title = Column(String, nullable=False)
+    content = Column(Text, nullable=False)
+    source = Column(String, nullable=False)
+    date_published = Column(Date, nullable=False)
+    created_at = Column(DateTime, default= func.now())
+
+    article_category = relationship("ArticlesCategory", back_populates="articles")
+
+

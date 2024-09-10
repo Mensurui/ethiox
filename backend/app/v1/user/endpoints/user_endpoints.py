@@ -5,6 +5,8 @@ from ....config import get_db
 from ..services import user_services
 from typing import List, Optional
 from ..schemas import user_schemas
+from typing import Optional
+
 router = APIRouter()
 
 @router.get('/user/xlist')
@@ -43,3 +45,27 @@ async def get_clist(db:AsyncSession=Depends(get_db)):
 async def get_images_urls(db: AsyncSession = Depends(get_db)) -> List[user_schemas.ImageURLOut]:
     promo_values = await user_services.images_urls(db=db)
     return promo_values
+
+@router.get('/user/news')
+async def get_news(article_id:Optional[int]=None , db:AsyncSession=Depends(get_db)):
+    try:
+        article_values = await user_services.get_article(article_id=article_id ,db=db)
+        return article_values
+    except Exception as e:
+        raise HTTPException(status_code=405, detail=f"Internal Server Error because of {e}")
+
+@router.get('/user/news_topics')
+async def get_titles(db:AsyncSession=Depends(get_db)):
+    try:
+        article_value = await user_services.get_title_articles(db=db)
+        return article_value
+    except Exception as e:
+        raise HTTPException(status_code=405, detail=f"Internal Server Error because of {e}")
+
+@router.get('/user/related-news')
+async def get_relatednews(category:int, db:AsyncSession=Depends(get_db)):
+    try:
+        related = await user_services.related_news(category=category, db=db)
+        return related
+    except Exception as e:
+        raise HTTPException(status_code=403, detail=f"Error is: {e}")

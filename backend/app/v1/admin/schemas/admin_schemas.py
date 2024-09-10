@@ -1,5 +1,6 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
+from datetime import date
 
 class AdminInput(BaseModel):
     username:str
@@ -43,3 +44,30 @@ class PromotionalImagesout(BaseModel):
     url:str
     class Config:
         orm_mode=True
+
+class Article(BaseModel):
+    title:str
+    sub_title:str
+    content:str
+    source:str
+    article_category_id:int
+    date_published:date
+
+class ArticleOut(BaseModel):
+    title:str
+    sub_title:str
+    content:str
+    source:str
+    author:Optional[str]=None
+    article_category_name:str
+    date_published:date
+    class Config:
+        orm_mode=True
+
+class ArticlesShowcase(BaseModel):
+    id:int
+    title:str
+    source:str
+    date_published:date
+    class Config:
+        orm_mode = True

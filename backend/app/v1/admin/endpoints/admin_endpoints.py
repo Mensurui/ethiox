@@ -12,6 +12,7 @@ import cloudinary
 from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
 from ....settings import settings
+from typing import Optional
 
 
 router = APIRouter()
@@ -95,3 +96,45 @@ async def get_images(current_user=Depends(auth_services.get_current_user), db:As
 async def delete_image(image_id:int, current_user=Depends(auth_services.get_current_user), db:AsyncSession=Depends(get_db)):
     image_value = await admin_services.remove_image(image_id=image_id, db=db)
     return image_value
+
+@router.post('/admin/news_cat')
+async def add_category(article_category_name:str,current_user=Depends(auth_services.get_current_user), db:AsyncSession=Depends(get_db)):
+    try:
+        article_category_name = article_category_name.lower()
+        cat_value = await admin_services.add_art_category(article_category_name=article_category_name, db=db)
+        return cat_value
+    except Exception as e:
+        raise HTTPException(status_code=403, detail=f"Error is: {e}")
+
+@router.get('/admin/news_categ')
+async def get_category(db:AsyncSession=Depends(get_db)):
+    try:
+        article_categ_value= await admin_services.get_art_category(db=db)
+        return article_categ_value
+    except Exception as e:
+        raise HTTPException(status_code=403, detail=f"Error is: {e}")
+
+@router.post('/admin/news')
+async def add_news(article_data:admin_schemas.Article, current_user=Depends(auth_services.get_current_user), db:AsyncSession=Depends(get_db)):
+    try:
+        article_value = await admin_services.add_article(article_data=article_data, db=db)
+        return {"message":"success"}
+
+    except Exception as e:
+        raise HTTPException(status_code=405, detail=f"Internal Server Error because of {e}")
+
+@router.get('/admin/news')
+async def get_news(article_id:Optional[int]=None ,current_user=Depends(auth_services.get_current_user), db:AsyncSession=Depends(get_db)):
+    try:
+        article_values = await admin_services.get_article(article_id=article_id ,db=db)
+        return article_values
+    except Exception as e:
+        raise HTTPException(status_code=405, detail=f"Internal Server Error because of {e}")
+
+@router.get('/admin/news_topics')
+async def get_titles(current_user=Depends(auth_services.get_current_user), db:AsyncSession=Depends(get_db)):
+    try:
+        article_value = await admin_services.get_title_articles(db=db)
+        return article_value
+    except Exception as e:
+        raise HTTPException(status_code=405, detail=f"Internal Server Error because of {e}")
